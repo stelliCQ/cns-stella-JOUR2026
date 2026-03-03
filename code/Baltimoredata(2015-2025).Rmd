@@ -1,0 +1,115 @@
+---
+title: "Stella Canino - CNS Crime (Baltimore - factcheck)"
+output: html_notebook
+---
+
+## Load libraries and establish settings
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load the tidyverse. If you have not installed the tidyverse already, remove the # from the next line and run it first.  
+# install.packages('tidyverse')
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(knitr)      # For nice tables
+
+```
+
+```{r}
+baltimore2022_2025 <-read_csv("~/Documents/GitHub/cns-stella-JOUR2026/code/NIBRS_GroupA_Crime_Data_-5915360283347319659.csv") 
+
+```
+
+
+```{r}
+#Cleaning data
+clean_balt_2022_2025 <- baltimore2022_2025 |>
+  select(CrimeDateTime, Description)
+```
+
+```{r}
+head(clean_balt_2022_2025$CrimeDateTime)
+```
+
+```{r}
+newbaltdata <- clean_balt_2022_2025 |> mutate(
+    CrimeDateTime = mdy_hms(CrimeDateTime)
+  )
+```
+
+```{r}
+newbaltdata <- newbaltdata |> mutate(CrimeDate = as.Date(CrimeDateTime),
+CrimeHour = hour(CrimeDateTime)                                     )
+```
+
+```{r}
+Baltimore2022_2025 <- newbaltdata |> select(CrimeDate, Description)
+```
+
+```{r}
+Baltimore2022_2025 <- Baltimore2022_2025 |> 
+  mutate(Description = case_when(
+    Description %in% c("ROBBERY - COMMERCIAL", "ROBBERY - CARJACKING") ~ "ROBBERY",
+    TRUE ~ Description
+  ))
+```
+
+```{r}
+Baltimore2022_2025 %>%
+  count(Description, sort = TRUE)
+```
+```{r}
+baltimore2015_2021 <-read_csv("~/Documents/GitHub/cns-stella-JOUR2026/code/Part1_Crime_Beta_-2010967692946472245.csv") 
+```
+
+```{r}
+#Cleaning data
+clean_baltimore2015_2021 <- baltimore2015_2021 |>
+  select(CrimeDateTime, Description)
+```
+
+```{r}
+head(clean_baltimore2015_2021$CrimeDateTime)
+```
+
+```{r}
+newbaltdata_2015_2021 <- clean_baltimore2015_2021 |> mutate(
+    CrimeDateTime = mdy_hms(CrimeDateTime)
+  )
+```
+
+```{r}
+newbaltdata_2015_2021 <- newbaltdata_2015_2021 |> mutate(CrimeDate = as.Date(CrimeDateTime),
+CrimeHour = hour(CrimeDateTime)                                     )
+```
+
+```{r}
+Baltimore2015_2021 <- newbaltdata_2015_2021 |> select(CrimeDate, Description)
+```
+
+```{r}
+Baltimore2015_2021 <- Baltimore2015_2021 |> 
+  mutate(Description = case_when(
+    Description %in% c("ROBBERY - COMMERCIAL", "ROBBERY - CARJACKING") ~ "ROBBERY",
+    TRUE ~ Description
+  ))
+```
+
+```{r}
+Baltimore2015_2021 %>%
+  count(Description, sort = TRUE)
+```
+```{r}
+
+Baltimore_2015_2025 <- bind_rows(
+  Baltimore2015_2021,
+  Baltimore2022_2025
+)
+
+```
+
+
+
